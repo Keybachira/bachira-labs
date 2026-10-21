@@ -1,0 +1,102 @@
+import type { ProjectRecord } from "../types"
+import { normalizeFiles } from "../utils/files"
+
+/**
+ * Catálogo de projetos (substitui o "registo CMS" do Framer).
+ * Edita aqui, ou carrega de uma API/JSON e passa por normalizeFiles().
+ */
+export const PROJECTS: ProjectRecord[] = [
+    {
+        id: "omilu-map",
+        title: "Omilu Geo",
+        description: "Mapa utilitário demonstrativo.",
+        kind: "map web",
+        technologies: "React,TypeScript,Leaflet",
+        version: "0.1.0",
+        installCommand: "",
+        requirements: "Navegador moderno",
+        demoUrl: "",
+        projectSlug: "omilu-map",
+        files: [],
+    },
+    {
+        id: "depsandbox-cli",
+        title: "DepSandbox",
+        description: "Ambiente CLI simulado e seguro para testar dependências.",
+        kind: "cli",
+        technologies: "Rust,Node",
+        version: "0.2.1",
+        installCommand: "npm i depsandbox (exemplo não publicado)",
+        requirements: "Node 18+",
+        demoUrl: "",
+        projectSlug: "depsandbox-shell",
+        files: normalizeFiles([
+            {
+                name: "depsandbox-linux.tar.gz",
+                url: "https://example.com/depsandbox-linux.tar.gz",
+                size: "4.2 MB",
+                os: "Linux",
+                checksum: "a1b2c3",
+            },
+        ]),
+    },
+    {
+        id: "stats-board",
+        title: "Stats Board",
+        description: "Painel de métricas com demo local.",
+        kind: "web dashboard",
+        technologies: "Next.js,SVG",
+        version: "0.3.0",
+        installCommand: "",
+        requirements: "Navegador moderno",
+        demoUrl: "",
+        projectSlug: "stats-dashboard",
+        files: [],
+    },
+    {
+        id: "vault-grid",
+        title: "Vault Grid",
+        description: "Gestor de ativos com navegação lateral.",
+        kind: "desktop",
+        technologies: "Rust,Tauri,React",
+        version: "0.1.4",
+        installCommand: "",
+        requirements: "Windows 10+ ou Linux",
+        demoUrl: "",
+        projectSlug: "vault-grid",
+        files: normalizeFiles([
+            {
+                nome: "vault-grid-setup.exe",
+                url: "https://example.com/vault-grid-setup.exe",
+                tamanho: "18 MB",
+                sistema: "Windows",
+            },
+        ]),
+    },
+    {
+        id: "skyline-gold",
+        title: "Skyline Gold",
+        description: "Jogo de arcade minimalista em pixel art.",
+        kind: "game",
+        technologies: "JS,Canvas",
+        version: "0.5.0",
+        installCommand: "",
+        requirements: "Navegador moderno",
+        demoUrl: "",
+        projectSlug: "skyline-gold",
+        files: [],
+    },
+    {
+        id: "mesa-restaurant",
+        title: "Mesa Restaurante",
+        description: "Menu digital para restaurantes locais.",
+        kind: "web",
+        technologies: "React,TS",
+        version: "1.0.0",
+        installCommand: "",
+        requirements: "Navegador moderno",
+        demoUrl: "",
+        projectSlug: "restaurant-menu",
+        files: [],
+    },
+]
