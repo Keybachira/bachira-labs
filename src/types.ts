@@ -6,6 +6,8 @@ export interface FileItem {
     checksum: string
 }
 
+export type ProjectStatus = "online" | "beta" | "wip"
+
 export interface ProjectRecord {
     id: string
     title: string
@@ -18,29 +20,17 @@ export interface ProjectRecord {
     demoUrl: string
     projectSlug: string
     files: FileItem[]
+    /** Ano de início (opcional, mostrado no detalhe). */
+    year?: string
+    /** Estado do projeto; o cartão usa a demo/CLI para o rótulo. */
+    status?: ProjectStatus
+    /** Repositório público, quando existir. */
+    repoUrl?: string
+    /** Destaques mostrados no diálogo de detalhe. */
+    features?: string[]
+    /** Descrição longa opcional. */
+    longDescription?: string
 }
-
-export interface TerminalEntry {
-    id: string
-    type: "command" | "output" | "error"
-    text: string
-    promptSnapshot: string
-}
-
-export interface HistoryItem {
-    command: string
-    promptSnapshot: string
-}
-
-export type SectionKey =
-    | "inicio"
-    | "projetos"
-    | "terminal"
-    | "about"
-    | "skills"
-    | "docs"
-    | "downloads"
-    | "contact"
 
 export interface SiteConfig {
     userName: string
@@ -48,10 +38,8 @@ export interface SiteConfig {
     brandName: string
     tagline: string
     location: string
-}
-
-export interface PaletteItem {
-    type: "section" | "command" | "project"
-    label: string
-    action: () => void
+    /** Email usado no formulário de contacto (mailto). */
+    email: string
+    /** Frase curta de disponibilidade mostrada no contacto. */
+    availability: string
 }

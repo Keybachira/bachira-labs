@@ -1,7 +1,24 @@
-import { WebTerminal } from "./components/WebTerminal"
-import { DEFAULT_CONFIG } from "./constants"
-import { PROJECTS } from "./data/projects"
+import { Shell } from "./components/layout/Shell"
+import { GitHubProvider } from "./context/GitHubContext"
+import { AboutPage } from "./pages/AboutPage"
+import { ContactPage } from "./pages/ContactPage"
+import { GitHubPage } from "./pages/GitHubPage"
+import { HomePage } from "./pages/HomePage"
+import { ProjectsPage } from "./pages/ProjectsPage"
+import { useRoute } from "./router"
 
 export default function App() {
-    return <WebTerminal config={DEFAULT_CONFIG} projects={PROJECTS} />
+    const route = useRoute()
+
+    return (
+        <GitHubProvider>
+            <Shell route={route}>
+                {route.page === "inicio" && <HomePage />}
+                {route.page === "projetos" && <ProjectsPage projectId={route.projectId} />}
+                {route.page === "github" && <GitHubPage />}
+                {route.page === "sobre" && <AboutPage />}
+                {route.page === "contacto" && <ContactPage />}
+            </Shell>
+        </GitHubProvider>
+    )
 }

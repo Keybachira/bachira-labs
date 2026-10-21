@@ -1,2 +1,7 @@
 node_modules
 dist
+
+# Segredos locais (VITE_GITHUB_TOKEN, etc.)
+.env
+.env.local
+.env.*.local
