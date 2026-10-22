@@ -1,7 +1,7 @@
 /**
  * Conexão com o GitHub — cliente da API oficial (REST + GraphQL), sem dependências.
  *
- * Usado pelo dashboard "Bachira Labs": perfil, repositórios, últimos commits,
+ * Usado pelo dashboard "Aquiles_Bachira Repository": perfil, repositórios, últimos commits,
  * linguagens e mapa de contribuições.
  *
  * Configuração (ficheiro `.env` na raiz, ver `.env.example`):
@@ -140,8 +140,43 @@ export interface GitHubRepo {
     isPrivate: boolean
     updatedAt: string
     pushedAt: string | null
+    /** Pessoas a seguir o repositório (distinto de stars). */
+    subscribers: number
+    openIssues: number
+    /** Identificador SPDX da licença, quando existe. */
+    license: string | null
+    defaultBranch: string
+    createdAt: string
+    /** `true` quando o repositório tem GitHub Pages publicado. */
+    hasPages: boolean
     /** Bytes por linguagem (preenchido por fetchGitHubLanguages). */
     languages: Record<string, number>
+}
+
+export interface GitHubReleaseAsset {
+    name: string
+    sizeBytes: number
+    downloadUrl: string
+}
+
+export interface GitHubRelease {
+    tag: string
+    name: string
+    htmlUrl: string
+    publishedAt: string
+    assets: GitHubReleaseAsset[]
+}
+
+/** Dados de um projeto individual, usados na página `#/projetos/:id`. */
+export interface GitHubProject {
+    repo: GitHubRepo
+    release: GitHubRelease | null
+    commits: GitHubCommit[]
+    /** ZIP do branch principal, sempre disponível como alternativa. */
+    zipUrl: string
+    /** `true` quando os dados vêm da cache por falha da API. */
+    stale: boolean
+    updatedAt: string
 }
 
 export interface GitHubCommit {
@@ -391,6 +426,39 @@ function writeCache(key: string, data: GitHubDashboard): void {
     }
 }
 
+interface ProjectCacheEntry {
+    savedAt: number
+    data: GitHubProject
+}
+
+function projectCacheKey(config: GitHubConfig, repoName: string): string {
+    return `${CACHE_PREFIX}:project:${config.username.toLowerCase()}:${repoName.toLowerCase()}`
+}
+
+function readProjectCache(key: string): ProjectCacheEntry | null {
+    const store = storage()
+    if (!store) return null
+    try {
+        const raw = store.getItem(key)
+        if (!raw) return null
+        const parsed = JSON.parse(raw) as ProjectCacheEntry
+        if (!parsed?.data?.repo) return null
+        return parsed
+    } catch {
+        return null
+    }
+}
+
+function writeProjectCache(key: string, data: GitHubProject): void {
+    const store = storage()
+    if (!store) return
+    try {
+        store.setItem(key, JSON.stringify({ savedAt: Date.now(), data } satisfies ProjectCacheEntry))
+    } catch {
+        /* quota cheia ou modo privado: segue sem cache */
+    }
+}
+
 /** Apaga os dados guardados (útil depois de mudar de utilizador ou token). */
 export function clearGitHubCache(): void {
     const store = storage()
@@ -443,6 +511,12 @@ interface RawRepo {
     private: boolean
     updated_at: string
     pushed_at: string | null
+    subscribers_count?: number
+    open_issues_count?: number
+    license?: { spdx_id?: string | null; name?: string | null } | null
+    default_branch?: string
+    created_at?: string
+    has_pages?: boolean
 }
 
 interface RawCommit {
@@ -453,6 +527,15 @@ interface RawCommit {
         author: { name?: string; date?: string } | null
     }
     author: { login: string; html_url: string; avatar_url: string } | null
+}
+
+interface RawRelease {
+    tag_name: string
+    name: string | null
+    html_url: string
+    published_at: string | null
+    created_at: string
+    assets?: { name: string; size: number; browser_download_url: string }[] | null
 }
 
 function toProfile(raw: RawUser): GitHubProfile {
@@ -490,7 +573,46 @@ function toRepo(raw: RawRepo): GitHubRepo {
         isPrivate: raw.private === true,
         updatedAt: raw.updated_at,
         pushedAt: raw.pushed_at,
+        subscribers: raw.subscribers_count ?? 0,
+        openIssues: raw.open_issues_count ?? 0,
+        license:
+            raw.license && raw.license.spdx_id && raw.license.spdx_id !== "NOASSERTION"
+                ? raw.license.spdx_id
+                : (raw.license?.name ?? null),
+        defaultBranch: raw.default_branch ?? "main",
+        createdAt: raw.created_at ?? raw.updated_at,
+        hasPages: raw.has_pages === true,
         languages: {},
+    }
+}
+
+function toCommit(raw: RawCommit, repo: GitHubRepo, fallbackAuthor = "—"): GitHubCommit {
+    return {
+        sha: raw.sha,
+        shortSha: raw.sha.slice(0, 7),
+        message: raw.commit.message.split("\n")[0].trim(),
+        repo: repo.name,
+        repoUrl: repo.htmlUrl,
+        repoIsPrivate: repo.isPrivate,
+        author: raw.author?.login ?? raw.commit.author?.name ?? fallbackAuthor,
+        authorUrl: raw.author?.html_url ?? null,
+        avatarUrl: raw.author?.avatar_url ?? null,
+        htmlUrl: raw.html_url,
+        date: raw.commit.author?.date ?? new Date(0).toISOString(),
+    }
+}
+
+function toRelease(raw: RawRelease): GitHubRelease {
+    return {
+        tag: raw.tag_name,
+        name: raw.name ?? raw.tag_name,
+        htmlUrl: raw.html_url,
+        publishedAt: raw.published_at ?? raw.created_at,
+        assets: (raw.assets ?? []).map((asset) => ({
+            name: asset.name,
+            sizeBytes: asset.size,
+            downloadUrl: asset.browser_download_url,
+        })),
     }
 }
 
@@ -630,19 +752,7 @@ export async function fetchGitHubCommits(
         if (result.status !== "fulfilled") return
         const repo = sources[index]
         result.value.forEach((raw) => {
-            commits.push({
-                sha: raw.sha,
-                shortSha: raw.sha.slice(0, 7),
-                message: raw.commit.message.split("\n")[0].trim(),
-                repo: repo.name,
-                repoUrl: repo.htmlUrl,
-                repoIsPrivate: repo.isPrivate,
-                author: raw.author?.login ?? raw.commit.author?.name ?? cfg.username,
-                authorUrl: raw.author?.html_url ?? null,
-                avatarUrl: raw.author?.avatar_url ?? null,
-                htmlUrl: raw.html_url,
-                date: raw.commit.author?.date ?? new Date(0).toISOString(),
-            })
+            commits.push(toCommit(raw, repo, cfg.username))
         })
     })
 
@@ -1037,6 +1147,65 @@ export async function fetchGitHubDashboard(
                 updatedAt: cached.data.updatedAt,
             }
         }
+        throw error
+    }
+}
+
+/**
+ * Dados de um projeto individual: repositório, última release e commits
+ * recentes. Também tem cache (por repositório) e devolve cache marcada como
+ * `stale` quando a API falha.
+ */
+export async function fetchGitHubProject(
+    repoName: string,
+    overrides: Partial<GitHubConfig> = {},
+    options: FetchDashboardOptions = {}
+): Promise<GitHubProject> {
+    const config = resolveGitHubConfig(overrides)
+    const key = projectCacheKey(config, repoName)
+    const cached = readProjectCache(key)
+
+    if (!options.force && cached && Date.now() - cached.savedAt < config.cacheTtlMs) {
+        return { ...cached.data, stale: false }
+    }
+
+    const path = `/repos/${encodeURIComponent(config.username)}/${encodeURIComponent(repoName)}`
+
+    try {
+        const [rawRepo, rawCommits, rawRelease, rawLanguages] = await Promise.all([
+            request<RawRepo>(path, config, { signal: options.signal }),
+            request<RawCommit[]>(`${path}/commits?per_page=5`, config, { signal: options.signal }).catch(
+                () => [] as RawCommit[]
+            ),
+            request<RawRelease>(`${path}/releases/latest`, config, { signal: options.signal }).catch(
+                () => null
+            ),
+            request<Record<string, number>>(`${path}/languages`, config, {
+                signal: options.signal,
+            }).catch(() => ({}) as Record<string, number>),
+        ])
+
+        const repo = { ...toRepo(rawRepo), languages: rawLanguages }
+        const data: GitHubProject = {
+            repo,
+            release: rawRelease ? toRelease(rawRelease) : null,
+            commits: rawCommits.map((raw) => toCommit(raw, repo, config.username)),
+            zipUrl: `https://github.com/${repo.fullName}/archive/refs/heads/${repo.defaultBranch}.zip`,
+            stale: false,
+            updatedAt: new Date().toISOString(),
+        }
+
+        writeProjectCache(key, data)
+        return data
+    } catch (caught) {
+        if (isAbortError(caught)) throw caught
+
+        const error =
+            caught instanceof GitHubError
+                ? caught
+                : new GitHubError(`Sem ligação ao GitHub (${errorMessage(caught)}).`, 0)
+
+        if (cached) return { ...cached.data, stale: true }
         throw error
     }
 }

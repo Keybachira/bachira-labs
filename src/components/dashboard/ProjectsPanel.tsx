@@ -5,12 +5,11 @@ import { ProjectCard } from "./ProjectCard"
 
 interface Props {
     projects: ProjectRecord[]
-    onOpen: (project: ProjectRecord) => void
     title?: string
     showAllLink?: boolean
 }
 
-export function ProjectsPanel({ projects, onOpen, title = "Projetos em destaque", showAllLink = true }: Props) {
+export function ProjectsPanel({ projects, title = "Projetos em destaque", showAllLink = true }: Props) {
     return (
         <section className="section" id="projetos">
             <div className="section__head">
@@ -28,7 +27,7 @@ export function ProjectsPanel({ projects, onOpen, title = "Projetos em destaque"
 
             <div className="projects">
                 {projects.map((project) => (
-                    <ProjectCard key={project.id} project={project} onOpen={onOpen} />
+                    <ProjectCard key={project.id} project={project} />
                 ))}
             </div>
         </section>

@@ -37,10 +37,8 @@ export function TopBar({ brand, active, status, theme, menuOpen, onOpenMenu, onT
                 <DashIcon name={menuOpen ? "close" : "menu"} size={18} />
             </button>
 
-            <Link className="brand" to="inicio" aria-label="Bachira Labs — início">
-                <span className="brand__mark" aria-hidden="true">
-                    B<i>/</i>
-                </span>
+            <Link className="brand" to="inicio" aria-label="Aquiles_Bachira Repository — início">
+
                 <span className="brand__name">{brand}</span>
             </Link>
 
@@ -58,9 +56,12 @@ export function TopBar({ brand, active, status, theme, menuOpen, onOpenMenu, onT
             </nav>
 
             <div className="topbar__meta">
-                <span className={`status status--${status}`}>
+                <span
+                    className={`status status--${status}`}
+                    aria-label={`Estado: ${STATUS_LABEL[status]}`}
+                >
                     <span className="status__dot" aria-hidden="true" />
-                    {STATUS_LABEL[status]}
+                    <span className="status__label">{STATUS_LABEL[status]}</span>
                 </span>
                 <span className="topbar__location">Angola / Benguela</span>
                 <button

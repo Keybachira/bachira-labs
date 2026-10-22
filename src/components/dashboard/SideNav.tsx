@@ -1,4 +1,5 @@
 import { Link, type PageKey } from "../../router"
+import { BrandMark } from "./BrandMark"
 import { DashIcon, type DashIconName } from "./icons"
 
 interface Props {
@@ -38,9 +39,7 @@ export function SideNav({ brand, active, author }: Props) {
             </blockquote>
 
             <div className="sidebar__brand">
-                <span className="brand__mark brand__mark--sm" aria-hidden="true">
-                    B<i>/</i>
-                </span>
+                <BrandMark size="sm" />
                 <span>{brand}</span>
                 <span className="sidebar__version">v1.1.0</span>
             </div>

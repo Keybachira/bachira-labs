@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react"
 import { Link, type PageKey } from "../../router"
+import { BrandMark } from "./BrandMark"
 import { DashIcon, type DashIconName } from "./icons"
 
 interface Props {
@@ -44,10 +45,8 @@ export function MobileNav({ open, active, user, onClose }: Props) {
             <div className="mobile-nav__backdrop" onClick={onClose} />
             <div className="mobile-nav__panel" ref={panelRef}>
                 <div className="mobile-nav__head">
-                    <span className="brand__mark" aria-hidden="true">
-                        B<i>/</i>
-                    </span>
-                    <span className="mobile-nav__title">BACHIRA LABS</span>
+                    <BrandMark />
+                    <span className="mobile-nav__title">Aquiles_Bachira Repository</span>
                     <button type="button" className="icon-btn" onClick={onClose} aria-label="Fechar menu">
                         <DashIcon name="close" size={16} />
                     </button>

@@ -8,11 +8,11 @@ export interface Route {
 }
 
 export const PAGE_META: Record<PageKey, { label: string; path: string; title: string }> = {
-    inicio: { label: "Início", path: "/", title: "Bachira Labs" },
-    projetos: { label: "Projetos", path: "/projetos", title: "Projetos · Bachira Labs" },
-    github: { label: "GitHub", path: "/github", title: "GitHub · Bachira Labs" },
-    sobre: { label: "Sobre", path: "/sobre", title: "Sobre · Bachira Labs" },
-    contacto: { label: "Contacto", path: "/contacto", title: "Contacto · Bachira Labs" },
+    inicio: { label: "Início", path: "/", title: "Aquiles_Bachira Repository" },
+    projetos: { label: "Projetos", path: "/projetos", title: "Projetos · Aquiles_Bachira Repository" },
+    github: { label: "GitHub", path: "/github", title: "GitHub · Aquiles_Bachira Repository" },
+    sobre: { label: "Sobre", path: "/sobre", title: "Sobre · Aquiles_Bachira Repository" },
+    contacto: { label: "Contacto", path: "/contacto", title: "Contacto · Aquiles_Bachira Repository" },
 }
 
 function parseHash(hash: string): Route {

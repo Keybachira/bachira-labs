@@ -1,4 +1,3 @@
-import { useMemo } from "react"
 import { ActivityPanel } from "../components/dashboard/ActivityPanel"
 import { CommitsPanel } from "../components/dashboard/CommitsPanel"
 import { Hero } from "../components/dashboard/Hero"
@@ -9,24 +8,20 @@ import { RecentRepos } from "../components/dashboard/RecentRepos"
 import { StatsPanel } from "../components/dashboard/StatsPanel"
 import { DEFAULT_CONFIG } from "../constants"
 import { useGitHubContext } from "../context/GitHubContext"
-import { PROJECTS } from "../data/projects"
-import { navigate } from "../router"
+import { FEATURED_PROJECTS, PROJECTS } from "../data/projects"
 
-const BRAND = "BACHIRA LABS"
+const BRAND = "Aquiles_Bachira Repository"
 
 export function HomePage() {
     const { data, loading } = useGitHubContext()
-    const featured = useMemo(() => PROJECTS.slice(0, 4), [])
+    const featured = FEATURED_PROJECTS.slice(0, 4)
     const name = (data?.profile.name ?? DEFAULT_CONFIG.brandName).replace(/_/g, " ")
 
     return (
         <div className="workspace__grid">
             <div className="col-main">
                 <Hero name={name} brand={BRAND} />
-                <ProjectsPanel
-                    projects={featured}
-                    onOpen={(project) => navigate("projetos", project.id)}
-                />
+                <ProjectsPanel projects={featured} />
                 <ActivityPanel activity={data?.activity ?? []} loading={loading} />
             </div>
 

@@ -1,3 +1,5 @@
+import { BrandMark } from "./BrandMark"
+
 interface Props {
     name: string
     brand: string
@@ -28,7 +30,7 @@ export function Hero({ name, brand }: Props) {
             <div className="console" aria-hidden="true">
                 <span className="console__chev">&gt;</span>
                 <div className="console__inner">
-                    <span className="brand__mark brand__mark--lg">B<i>/</i></span>
+                    <BrandMark size="lg" />
                     <span className="console__brand">{brand}</span>
                 </div>
             </div>

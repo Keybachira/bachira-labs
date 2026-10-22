@@ -1,10 +1,9 @@
-import type { GitHubRepo } from "../../services/github"
 import type { ProjectRecord } from "../../types"
 import { isHttpLink } from "../../utils/links"
 import type { DashIconName } from "./icons"
 
 const KIND_LABELS: Record<string, string> = {
-    "map web": "Mapa",
+    app: "App",
     cli: "CLI",
     desktop: "Desktop",
     web: "Web",
@@ -19,12 +18,12 @@ export function kindLabel(kind: string): string {
 
 export function iconForProject(project: ProjectRecord): DashIconName {
     const kind = project.kind.toLowerCase()
-    if (kind.includes("map")) return "pin"
     if (kind.includes("cli")) return "terminal"
+    if (kind.includes("app")) return "phone"
     if (kind.includes("desktop")) return "grid"
-    if (kind.includes("game")) return "gamepad"
     if (kind.includes("dashboard")) return "chart"
-    if (kind.includes("web")) return "utensils"
+    if (kind.includes("game")) return "gamepad"
+    if (kind.includes("web")) return "layers"
     return "folder"
 }
 
@@ -33,39 +32,19 @@ export function iconForRepo(name: string): DashIconName {
     if (/(geo|map|pin)/.test(value)) return "pin"
     if (/(sandbox|cli|shell|term|element)/.test(value)) return "terminal"
     if (/(grid|vault|dashboard|panel|lab)/.test(value)) return "grid"
-    if (/(menu|mesa|restaurant|food|fatur)/.test(value)) return "utensils"
+    if (/(menu|mesa|restaurant|food|kianda|fatur|cardapio)/.test(value)) return "utensils"
     if (/(finance|financ|stats)/.test(value)) return "chart"
+    if (/(chat|vyra|studio)/.test(value)) return "phone"
     return "repo"
 }
 
-export type ProjectStatus = "demo" | "online" | null
+export type ProjectStatus = "demo" | null
 
+/** Só há selo quando existe link de produção verificado. */
 export function projectStatus(project: ProjectRecord): ProjectStatus {
-    if (isHttpLink(project.demoUrl)) return "demo"
-    if (project.kind.toLowerCase().includes("cli")) return "online"
-    return null
+    return project.demoUrl && isHttpLink(project.demoUrl) ? "demo" : null
 }
 
 export function projectTags(project: ProjectRecord, max = 3): string[] {
-    return project.technologies
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter(Boolean)
-        .slice(0, max)
-}
-
-/** Link do código-fonte: repositório real quando existe, senão o perfil. */
-export function projectSourceUrl(
-    project: ProjectRecord,
-    repos: GitHubRepo[] | undefined,
-    username: string
-): string {
-    const match = repos?.find(
-        (repo) => repo.name === project.projectSlug || repo.name === project.id
-    )
-    return match?.htmlUrl ?? `https://github.com/${username}?tab=repositories`
-}
-
-export function profileUrl(username: string, path = ""): string {
-    return `https://github.com/${username}${path}`
+    return project.technologies.map((tag) => tag.trim()).filter(Boolean).slice(0, max)
 }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react"
 import { useGitHubContext } from "../../context/GitHubContext"
+import { findProject } from "../../data/projects"
 import { PAGE_META, type Route } from "../../router"
 import { MobileNav } from "../dashboard/MobileNav"
 import { ShellFooter } from "../dashboard/ShellFooter"
@@ -9,7 +10,7 @@ import { DashIcon } from "../dashboard/icons"
 
 type Theme = "dark" | "light"
 
-const BRAND = "BACHIRA LABS"
+const BRAND = "Aquiles_Bachira Repository"
 const THEME_KEY = "bachira:theme"
 
 function readTheme(): Theme {
@@ -55,7 +56,10 @@ export function Shell({ route, children }: Props) {
     useEffect(() => {
         setMenuOpen(false)
         document.querySelector(".workspace")?.scrollTo({ top: 0 })
-        document.title = PAGE_META[route.page].title
+        const project = route.page === "projetos" ? findProject(route.projectId) : undefined
+        document.title = project
+            ? `${project.title} · ${BRAND}`
+            : PAGE_META[route.page].title
     }, [route.page, route.projectId])
 
     const toggleTheme = useCallback(() => {

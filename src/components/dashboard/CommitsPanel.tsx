@@ -56,10 +56,10 @@ export function CommitsPanel({ commits, loading = false, limit = 5 }: Props) {
                                 )}
                             </span>
                             <span className="commit__meta">
-                                <span>{formatRelativeTime(commit.date)}</span>
+                                <span className="commit__time">{formatRelativeTime(commit.date)}</span>
                                 <span className="commit__repo">
                                     <i className="commit__dot" aria-hidden="true" />
-                                    {commit.repo}
+                                    <span className="commit__repo-name">{commit.repo}</span>
                                 </span>
                             </span>
                         </span>

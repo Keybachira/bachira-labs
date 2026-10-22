@@ -1,4 +1,4 @@
-# Bachira Labs
+# Aquiles_Bachira Repository
 
 Portefólio pessoal (React + Vite + TypeScript) com cinco páginas, dados reais do
 GitHub, tema claro/escuro e layout responsivo. Sem dependências de UI.

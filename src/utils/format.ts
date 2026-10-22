@@ -52,6 +52,26 @@ export function formatRelativeTime(iso: string, now = Date.now()): string {
     return `há ${n} ano${n > 1 ? "s" : ""}`
 }
 
+/** Tamanhos de ficheiros pequenos (assets de release), com unidade adequada. */
+export function formatFileSize(bytes: number): string {
+    if (!Number.isFinite(bytes) || bytes <= 0) return "—"
+    if (bytes < 1024) return `${Math.round(bytes)} B`
+    if (bytes < 1_048_576) return `${Math.round(bytes / 1024)} KB`
+    const mb = bytes / 1_048_576
+    return `${mb >= 100 ? Math.round(mb) : Math.round(mb * 10) / 10} MB`
+}
+
+/** "2026-10-16T09:41:47Z" → "16 out 2026". */
+export function formatDate(iso: string): string {
+    const time = Date.parse(iso)
+    if (Number.isNaN(time)) return "—"
+    return new Date(time).toLocaleDateString("pt-PT", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+    })
+}
+
 /** Primeira letra maiúscula, usado nos avatares de recurso. */
 export function initialOf(value: string): string {
     return value.trim().charAt(0).toUpperCase() || "?"

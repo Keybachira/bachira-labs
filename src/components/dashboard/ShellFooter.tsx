@@ -1,16 +1,18 @@
 import { Link } from "../../router"
+import { BrandMark } from "./BrandMark"
 
 interface Props {
     brand: string
 }
 
+/** Portfólio publicado, ligado a partir do rodapé. */
+const PORTFOLIO_URL = "https://aquiles-bachira.vercel.app";
+
 export function ShellFooter({ brand }: Props) {
     return (
         <footer className="shell-footer">
             <div className="shell-footer__left">
-                <span className="brand__mark brand__mark--sm" aria-hidden="true">
-                    B<i>/</i>
-                </span>
+                <BrandMark size="sm" />
                 <span className="shell-footer__brand">{brand}</span>
                 <span className="shell-footer__sep" aria-hidden="true">
                     |
@@ -19,6 +21,14 @@ export function ShellFooter({ brand }: Props) {
             </div>
 
             <div className="shell-footer__right">
+                <a
+                    className="shell-footer__link"
+                    href={PORTFOLIO_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                >
+                    Portfólio
+                </a>
                 <Link className="shell-footer__link" to="contacto">
                     Falar comigo
                 </Link>
@@ -26,7 +36,7 @@ export function ShellFooter({ brand }: Props) {
                     <span className="chev" aria-hidden="true">
                         &gt;
                     </span>
-                    aquiles@bachira-labs:~$
+                    aquiles_bachira@repository:~$
                 </span>
             </div>
         </footer>

@@ -1,20 +1,16 @@
 import { useMemo, useState } from "react"
 import { DashIcon } from "../components/dashboard/icons"
 import { ProjectCard } from "../components/dashboard/ProjectCard"
-import { ProjectDetail } from "../components/dashboard/ProjectDetail"
 import { kindLabel } from "../components/dashboard/visual"
-import { Dialog } from "../components/ui/Dialog"
 import { EmptyState } from "../components/ui/EmptyState"
 import { PageHead } from "../components/ui/PageHead"
 import { PROJECTS } from "../data/projects"
-import { navigate } from "../router"
 
-export function ProjectsPage({ projectId }: { projectId?: string }) {
+export function ProjectsPage() {
     const [query, setQuery] = useState("")
     const [kind, setKind] = useState("todos")
 
     const kinds = useMemo(() => Array.from(new Set(PROJECTS.map((project) => project.kind))), [])
-    const selected = projectId ? PROJECTS.find((project) => project.id === projectId) : undefined
 
     const filtered = useMemo(() => {
         const term = query.trim().toLowerCase()
@@ -22,21 +18,26 @@ export function ProjectsPage({ projectId }: { projectId?: string }) {
             const matchesKind = kind === "todos" || project.kind === kind
             if (!matchesKind) return false
             if (!term) return true
-            return [project.title, project.description, project.technologies, project.kind]
+            return [
+                project.title,
+                project.description,
+                project.tagline,
+                project.repo,
+                project.technologies.join(" "),
+                project.kind,
+            ]
                 .join(" ")
                 .toLowerCase()
                 .includes(term)
         })
     }, [query, kind])
 
-    const close = () => navigate("projetos", undefined, true)
-
     return (
         <div className="page">
             <PageHead
                 eyebrow="biblioteca"
                 title="Projetos"
-                description="Tudo o que estou a construir, do utilitário de mapas ao jogo em Canvas. Abre um cartão para ver detalhes, stack e links."
+                description="Só projetos reais, ligados ao repositório de onde vêm as estrelas, os commits e os downloads. Abre um cartão para ver a página completa."
                 aside={<span className="count-pill">{PROJECTS.length} projetos</span>}
             />
 
@@ -84,11 +85,7 @@ export function ProjectsPage({ projectId }: { projectId?: string }) {
             {filtered.length > 0 ? (
                 <div className="projects projects--page">
                     {filtered.map((project) => (
-                        <ProjectCard
-                            key={project.id}
-                            project={project}
-                            onOpen={(item) => navigate("projetos", item.id)}
-                        />
+                        <ProjectCard key={project.id} project={project} />
                     ))}
                 </div>
             ) : (
@@ -98,18 +95,6 @@ export function ProjectsPage({ projectId }: { projectId?: string }) {
                     hint="Tenta outra palavra ou remove o filtro."
                 />
             )}
-
-            <Dialog open={Boolean(projectId)} title={selected?.title ?? "Projeto"} onClose={close}>
-                {selected ? (
-                    <ProjectDetail project={selected} />
-                ) : (
-                    <EmptyState
-                        icon="folder"
-                        title="Projeto não encontrado"
-                        hint="O link pode estar desactualizado."
-                    />
-                )}
-            </Dialog>
         </div>
     )
 }
